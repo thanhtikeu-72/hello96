@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hello96 Contacts</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <div class="app-container">
+
+    <header class="header">
+      <div class="logo-wrapper">
+        <div class="logo-square">
+          <img src="https://i.ibb.co/pvDqKLfb/hello96-logo2.png" alt="Hello96 Logo" id="helloLogo">
+        </div>
+        <div>
+          <h1>Hello96</h1>
+          <p class="tagline">Your intake contacts, neatly organized.</p>
+        </div>
+      </div>
+    </header>
+
+    <div class="top-bar">
+      <input type="text" id="searchInput" placeholder="Search contacts...">
+      <button id="adminBtn" class="ripple">Admin Login</button>
+      <button id="addContactBtn" class="ripple">Add New Contact</button>
+    </div>
+    
+    <!-- Admin Database Controls (Hidden by default) -->
+    <div id="adminControls" class="admin-controls" style="display:none;">
+       <button id="backupBtn" class="btn-backup"><i class="fas fa-download"></i> Backup JSON</button>
+       <button id="restoreBtn" class="btn-restore"><i class="fas fa-upload"></i> Restore JSON</button>
+       <input type="file" id="fileInput" accept=".json" style="display:none">
+    </div>
+
+    <div id="addContactFormContainer" class="add-contact-container" aria-hidden="true">
+      <form id="addContactForm">
+        <input type="text" id="name" placeholder="Name" required>
+        <input type="text" id="phone1" placeholder="Phone 1" required>
+        <input type="text" id="phone2" placeholder="Phone 2 (optional)">
+        <input type="text" id="address" placeholder="Address">
+        <input type="text" id="photo" placeholder="Profile Picture URL (optional)">
+        <button type="submit" class="ripple">Save Contact</button>
+      </form>
+    </div>
+
+    <div class="contact-list" id="contactList" aria-live="polite"></div>
+  </div>
+
+  <div id="editModal" class="modal-overlay">
+    <div class="modal-content">
+      <h2><i class="fas fa-user-edit"></i> Edit Contact</h2>
+      <form id="editContactForm">
+        <input type="hidden" id="editIndex">
+        <input type="text" id="editName" placeholder="Name" required>
+        <input type="text" id="editPhone1" placeholder="Phone 1" required>
+        <input type="text" id="editPhone2" placeholder="Phone 2 (optional)">
+        <input type="text" id="editAddress" placeholder="Address">
+        <input type="text" id="editPhoto" placeholder="Profile Picture URL (optional)">
+        <div class="modal-actions">
+          <button type="submit" class="btn-save ripple">Save Changes</button>
+          <button type="button" id="cancelEdit" class="btn-cancel ripple">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+  <footer class="app-footer">
+    <p>Version: 1.0 . 2025</p>
+    <p>Developer: Than Htike U Win</p>
+    <p>Data collector: San Win Naing</p>
+  </footer>
+  
+  <script src="script.js"></script>
+</body>
+</html>
