@@ -1,85 +1,280 @@
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#1976d2">
-
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Hello96">
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Hello96 Contacts</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="style.css">
+  <title>Hello96 Smart Manager</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  
+  <!-- PWA Manifest ချိတ်ဆက်ခြင်း -->
+<link rel="manifest" href="manifest.json">
+
+<!-- iOS (iPhone) အတွက် Icon -->
+<link rel="apple-touch-icon" href="hello96_logo.v2.1.png">
+
+<!-- Browser Address Bar အရောင် -->
+<meta name="theme-color" content="#007bff">
+  
+  <!-- FONTS -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Pyidaungsu&display=swap" rel="stylesheet">
+  
+  <!-- FONT AWESOME -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+  <!-- DRAWER MENU -->
+  <div class="menu-overlay" id="menuOverlay"></div>
+  <aside class="side-menu" id="sideMenu">
+      <div class="menu-header">
+          <h3>Menu</h3>
+          <button id="closeMenuBtn"><i class="fas fa-times"></i></button>
+      </div>
+      <ul class="menu-list">
+          <li onclick="openModal('aboutModal')"><i class="fas fa-info-circle"></i> About App</li>
+          <li onclick="openModal('policyModal')"><i class="fas fa-shield-alt"></i> Rules & Policy</li>
+          <li id="menuAdminBtn"><i class="fas fa-user-lock"></i> Admin Login</li>
+      </ul>
+      <div class="menu-footer">
+          <p>Hello96 Online v2.1</p>
+      </div>
+  </aside>
+
   <div class="app-container">
 
+    <!-- HEADER -->
     <header class="header">
-      <div class="logo-wrapper">
-        <div class="logo-square">
-          <img src="https://i.ibb.co/pvDqKLfb/hello96-logo2.png" alt="Hello96 Logo" id="helloLogo">
+      <div class="header-content">
+        <div class="logo-wrapper">
+          <div class="logo-square">
+            <img src="https://i.ibb.co/pvDqKLfb/hello96-logo2.png" alt="Logo">
+          </div>
+          <div id="adminBadge" class="admin-badge" style="display:none;">
+             <i class="fas fa-crown"></i>
+          </div>
         </div>
-        <div>
+        <div class="title-section">
           <h1>Hello96</h1>
-          <p class="tagline">Your intake contacts, neatly organized.</p>
+          <p class="tagline-main">Smart Contacts Manager</p>
+          <p class="tagline-sub">Your neatly organized contacts.</p>
+        </div>
+        <div class="header-utils">
+            <button id="themeToggle" class="icon-btn"><i class="fas fa-moon"></i></button>
+            <button id="notifBtn" class="icon-btn relative">
+               <i class="fas fa-bell"></i>
+               <!-- UPDATED BADGE FOR NUMBER -->
+               <span id="notifBadge" class="badge-count" style="display:none;">0</span>
+            </button>
+            <button id="menuBtn" class="icon-btn"><i class="fas fa-bars"></i></button>
         </div>
       </div>
     </header>
 
+    <!-- BIRTHDAY BOX -->
+    <div id="birthdayBox" class="birthday-box" style="display:none;">
+        <div class="bday-icon"><i class="fas fa-birthday-cake"></i></div>
+        <div class="bday-content">
+            <h4>Today's Birthdays</h4>
+            <div id="birthdayNames"></div>
+        </div>
+        <button id="closeBday" class="close-icon"><i class="fas fa-times"></i></button>
+    </div>
+
+    <!-- SEARCH & ACTION -->
     <div class="top-bar">
-      <input type="text" id="searchInput" placeholder="Search contacts...">
-      <button id="adminBtn" class="ripple">Admin Login</button>
-      <button id="addContactBtn" class="ripple">Add New Contact</button>
+      <div class="search-wrapper">
+         <i class="fas fa-search search-icon"></i>
+         <input type="text" id="searchInput" placeholder="Search contacts...">
+      </div>
+      <button id="addContactBtn" class="btn-primary" style="display:none;">
+          <i class="fas fa-plus"></i> Add
+      </button>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="dashboard-grid">
+        <div class="stat-box loc-npt" onclick="filterBy('naypyitaw')">
+            <span class="stat-val" id="countNPT">0</span>
+            <span class="stat-lbl">Naypyitaw</span>
+        </div>
+        <div class="stat-box loc-ygn" onclick="filterBy('yangon')">
+            <span class="stat-val" id="countYGN">0</span>
+            <span class="stat-lbl">Yangon</span>
+        </div>
+        <div class="stat-box loc-other" onclick="filterBy('other')">
+            <span class="stat-val" id="countOther">0</span>
+            <span class="stat-lbl">Other</span>
+        </div>
+        <div class="stat-box main-fav" onclick="filterBy('fav')">
+            <span class="stat-val" id="favCountDisplay">0</span>
+            <span class="stat-lbl"><i class="fas fa-star"></i> Favourites</span>
+        </div>
+        <div class="stat-box main-total" onclick="filterBy('all')">
+            <span class="stat-val" id="totalCountDisplay">0</span>
+            <span class="stat-lbl">Total Contacts</span>
+        </div>
     </div>
     
-    <!-- Admin Database Controls (Hidden by default) -->
+    <!-- FILTER STATUS -->
+    <div id="filterStatusContainer" style="display:none; text-align:center; margin-bottom:20px;">
+        <div class="filter-badge">
+            Showing: <span id="currentFilterName" style="margin-left:5px; font-weight:600;">All</span> 
+            <button onclick="filterBy('all')" class="filter-clear-btn">Clear</button>
+        </div>
+    </div>
+
+    <!-- ADMIN CONTROLS -->
     <div id="adminControls" class="admin-controls" style="display:none;">
-       <button id="backupBtn" class="btn-backup"><i class="fas fa-download"></i> Backup JSON</button>
-       <button id="restoreBtn" class="btn-restore"><i class="fas fa-upload"></i> Restore JSON</button>
-       <input type="file" id="fileInput" accept=".json" style="display:none">
+       <h4 style="margin-bottom:10px; color:var(--text-muted); font-size:0.9rem;">Admin Panel</h4>
+       <div class="admin-grid">
+           <button class="btn-admin-tool" onclick="openModal('announcementModal')"><i class="fas fa-bullhorn"></i> Announce</button>
+           <button class="btn-admin-tool" onclick="backupData()"><i class="fas fa-file-download"></i> Backup JSON</button>
+           <button class="btn-admin-tool" onclick="document.getElementById('fileInput').click()"><i class="fas fa-cloud-upload-alt"></i> Upload JSON</button>
+           <input type="file" id="fileInput" accept=".json" style="display:none" onchange="uploadJsonToFirestore(this)">
+       </div>
+       <p style="font-size:0.75rem; color:var(--text-muted); margin-top:5px;">Note: 'Backup JSON' downloads current cloud data.</p>
     </div>
 
-    <div id="addContactFormContainer" class="add-contact-container" aria-hidden="true">
-      <form id="addContactForm">
-        <input type="text" id="name" placeholder="Name" required>
-        <input type="text" id="phone1" placeholder="Phone 1" required>
-        <input type="text" id="phone2" placeholder="Phone 2 (optional)">
-        <input type="text" id="address" placeholder="Address">
-        <input type="text" id="photo" placeholder="Profile Picture URL (optional)">
-        <button type="submit" class="ripple">Save Contact</button>
-      </form>
+    <!-- LISTS -->
+    <div id="favContainer" style="display:none;">
+      <!-- UPDATED STAR COLOR HERE and PADDING -->
+      <h4 class="section-title"><i class="fas fa-star" style="color:#f59e0b;"></i> Favourites Contacts</h4>
+      <div class="contact-list" id="favList"></div>
+      
+      <!-- UPDATED DIVIDER SPACING -->
+      <hr class="section-divider">
     </div>
 
-    <div class="contact-list" id="contactList" aria-live="polite"></div>
+    <div class="contact-list" id="contactList">Loading data from cloud...</div>
+
   </div>
 
-  <div id="editModal" class="modal-overlay">
+  <!-- ================= MODALS ================= -->
+
+  <!-- ADD MODAL -->
+  <div id="addModal" class="modal-overlay">
     <div class="modal-content">
-      <h2><i class="fas fa-user-edit"></i> Edit Contact</h2>
-      <form id="editContactForm">
-        <input type="hidden" id="editIndex">
-        <input type="text" id="editName" placeholder="Name" required>
-        <input type="text" id="editPhone1" placeholder="Phone 1" required>
-        <input type="text" id="editPhone2" placeholder="Phone 2 (optional)">
-        <input type="text" id="editAddress" placeholder="Address">
-        <input type="text" id="editPhoto" placeholder="Profile Picture URL (optional)">
+      <h2>New Contact</h2>
+      <form id="addContactForm">
+        <input type="text" id="name" placeholder="Name" required>
+        <div class="row">
+            <input type="text" id="phone1" placeholder="Phone 1 (09...)" required>
+            <input type="date" id="dob">
+        </div>
+        <input type="text" id="phone2" placeholder="Phone 2">
+        <input type="text" id="address" placeholder="Address">
+        <div style="margin:10px 0;">
+            <label style="font-size:0.8rem;">Photo:</label>
+            <input type="hidden" id="photo">
+            <input type="file" id="addPhotoFile" accept="image/*">
+            <img id="addPreview" class="img-preview">
+        </div>
         <div class="modal-actions">
-          <button type="submit" class="btn-save ripple">Save Changes</button>
-          <button type="button" id="cancelEdit" class="btn-cancel ripple">Cancel</button>
+           <button type="submit" class="btn-submit">Save to Cloud</button>
+           <button type="button" class="btn-cancel" onclick="closeModal('addModal')">Cancel</button>
         </div>
       </form>
     </div>
   </div>
+
+  <!-- EDIT MODAL -->
+  <div id="editModal" class="modal-overlay">
+    <div class="modal-content">
+      <h2>Edit Contact</h2>
+      <form id="editContactForm">
+        <input type="hidden" id="editId">
+        <input type="text" id="editName" placeholder="Name" required>
+        <div class="row">
+            <input type="text" id="editPhone1" placeholder="Phone 1" required>
+            <input type="date" id="editDob">
+        </div>
+        <input type="text" id="editPhone2" placeholder="Phone 2">
+        <input type="text" id="editAddress" placeholder="Address">
+        <div style="margin:10px 0;">
+            <input type="hidden" id="editPhoto">
+            <input type="file" id="editPhotoFile" accept="image/*">
+            <img id="editPreview" class="img-preview">
+        </div>
+        <div class="modal-actions">
+          <button type="submit" class="btn-submit">Update Cloud</button>
+          <button type="button" class="btn-cancel" onclick="closeModal('editModal')">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <!-- POLICY MODAL -->
+  <div id="policyModal" class="modal-overlay">
+    <div class="modal-content large-modal">
+      <h3 style="font-family:'Pyidaungsu'; margin-bottom:15px; color:var(--primary); border-bottom:1px solid #eee; padding-bottom:10px;">မူဝါဒနှင့် စည်းမျဉ်းများ</h3>
+      <div class="policy-text-block" style="font-family:'Pyidaungsu'; line-height:1.7; font-size:0.95rem; text-align:justify;">
+          <p>ဤ Hello96 Mobile Application တွင် ပါဝင်သောလူပုဂ္ဂိုလ်များ၏ အမည်၊ ဖုန်းနံပါတ်၊ လိပ်စာ စသည့် ကိုယ်ရေးကိုယ်တာအချက်အလက်များသည် သက်ဆိုင်သူများ၏ ဆက်သွယ်ရေးအတွက်သာ အသုံးပြုရန် ဖြစ်ပါသည်။ ပြင်ပအဖွဲ့အစည်းများ (Third-party) သို့ မည်သည့်နည်းနှင့်မျှ ရောင်းချခြင်း၊ ဖြန့်ဝေခြင်း ပြုလုပ်မည်မဟုတ်ပါ။</p>
+          <p style="margin-top:15px; font-weight:bold; color:var(--primary);">၁။ အောက်ပါအချက်များကို အသုံးပြုသူအားလုံး လိုက်နာရမည် ဖြစ်ပါသည်-</p>
+          <ol style="margin-left:20px; margin-top:5px;">
+              <li>ဤ Hello96 Mobile Application ထဲရှိ အချက်အလက်များကို ကိုယ်ရေးကိုယ်တာ ရည်ရွယ်ချက်မှလွဲ၍ အသုံးမပြုရ။</li>
+              <li>ခွင့်ပြုချက်မရှိဘဲ Data အချက်အလက်များကိုကူးယူခြင်း၊ ဖြန့်ဝေခြင်း၊ မသက်ဆိုင်သူများထံ ပေါက်ကြားစေခြင်း လုံးဝ(လုံးဝ)မပြုလုပ်ရ။</li>
+              <li>Admin ခွင့်ပြုချက်မရှိဘဲပြင်ဆင်ခြင်း၊ ဖျက်ခြင်း မပြုလုပ်ရ။</li>
+              <li>Hello96 Mobile Application App အသုံးပြုမှုကြောင့် ဖြစ်ပေါ်လာသောမည်သည့် အလွဲသုံးစားမှုမဆိုအသုံးပြုသူကိုယ်တိုင် တာဝန်ယူရမည် ဖြစ်ပါသည်။</li>
+              <li>Hello96 Mobile Application App ကို ဆက်လက်အသုံးပြုခြင်းဖြင့်ဖော်ပြပါ မူဝါဒနှင့် စည်းမျဉ်းများကို လက်ခံသဘောတူပြီး ဖြစ်သည်ဟု မှတ်ယူပါမည်။</li>
+          </ol>
+          <p style="margin-top:15px; font-weight:bold; color:var(--primary);">၂။ တာဝန်ယူမှု အကန့်အသတ်</p>
+          <p>ဤ Hello96 Mobile Application ကို အသုံးပြု၍ ဖြစ်ပေါ်လာသော ဆက်သွယ်ရေးဆိုင်ရာ ပြဿနာများ၊ အချက်အလက် မှားယွင်းမှုများအတွက် Developer (ရေးသားသူ) ဘက်မှ တာဝန်ယူမည် မဟုတ်ပါ။</p>
+          <p style="margin-top:15px; font-weight:bold; color:var(--primary);">၃။ Admin လုပ်ပိုင်ခွင့်</p>
+          <p>Admin သည် မသင့်လျော်သော အချက်အလက်များ၊ မှားယွင်းနေသော အချက်အလက်များကို ကြိုတင်အသိပေးခြင်းမရှိဘဲ ပြင်ဆင်ခွင့်၊ ပယ်ဖျက်ခွင့် ရှိသည်။ Developer နှင့် Admin အဖွဲ့သည် လိုအပ်ပါက ဤစည်းမျဉ်းများကို အချိန်နှင့်အမျှ ပြင်ဆင်ခွင့်ရှိသည်။</p>
+      </div>
+      <div class="modal-actions">
+        <button onclick="closeModal('policyModal')" class="btn-cancel" style="width:100%; margin-top:15px;">ပိတ်မည်</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ABOUT MODAL -->
+  <div id="aboutModal" class="modal-overlay">
+      <div class="modal-content text-center">
+          <img src="https://i.ibb.co/pvDqKLfb/hello96-logo2.png" style="width:80px; margin-bottom:10px;">
+          <h3>Hello96 Smart Manager</h3>
+          <p style="color:#666; font-size:0.9rem;">Version 2.1 (Cloud)</p>
+          <div style="margin:20px 0; text-align:left; font-size:0.9rem;">
+              <p><strong>Developer:</strong> Than Htike U Win</p>
+              <p><strong>Data Collector:</strong> San Win Naing</p>
+          </div>
+          <button onclick="closeModal('aboutModal')" class="btn-cancel" style="width:100%">Close</button>
+      </div>
+  </div>
+
+  <!-- ANNOUNCEMENT ADMIN MODAL -->
+  <div id="announcementModal" class="modal-overlay">
+      <div class="modal-content">
+          <h3>Edit Announcement</h3>
+          <input type="checkbox" id="announceActive"> <label for="announceActive">Enable Popup</label>
+          <textarea id="announceText" rows="4" placeholder="Message..." style="width:100%; margin-top:10px;"></textarea>
+          <div class="modal-actions">
+              <button onclick="saveAnnouncement()" class="btn-submit">Publish Live</button>
+              <button onclick="closeModal('announcementModal')" class="btn-cancel">Cancel</button>
+          </div>
+      </div>
+  </div>
+
+  <!-- USER ANNOUNCE POPUP -->
+  <div id="userAnnounceModal" class="modal-overlay">
+      <div class="modal-content text-center">
+          <div style="font-size:3rem; color:var(--primary); margin-bottom:10px;"><i class="fas fa-bullhorn"></i></div>
+          <h3 style="font-family:'Pyidaungsu';">အသိပေးချက်</h3>
+          <p id="userAnnounceText" style="font-family:'Pyidaungsu'; margin:15px 0;"></p>
+          <button onclick="closeModal('userAnnounceModal')" class="btn-primary" style="width:100%">သိရှိပါသည်</button>
+      </div>
+  </div>
+ <!-- index.html အောက်ဆုံးနားမှာ ထည့်ပါ -->
+<audio id="audioBirthday" src="sounds/birthday.mp3"></audio>
+<audio id="audioAnnounce" src="sounds/announce.mp3"></audio>
   
-  <footer class="app-footer">
-    <p>Version: 1.0 . 2025</p>
-    <p>Developer: Than Htike U Win</p>
-    <p>Data collector: San Win Naing</p>
-  </footer>
-  
+  <!-- FIREBASE SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
